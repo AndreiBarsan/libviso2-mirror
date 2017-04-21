@@ -42,5 +42,5 @@ disp('Plotting ...');
 figure('Position',[1200 30 size(I1c,2) size(I1c,1)]); axes('Position',[0 0 1 1]);
 
 % Look at every k point match, since MATLAB is quite slow at rendering them.
-p_matched_subset = p_matched(:, 1:30:end);
+p_matched_subset = p_matched(:, 1:10:end);
 plotMatch(I1c, p_matched_subset, 2);
