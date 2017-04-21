@@ -32,20 +32,24 @@ void mexFunction (int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[]) {
 
   // read command
   char command[128];
-  mxGetString(prhs[0],command,128);
+  mxGetString(prhs[0], command, 128);
 
   // init
   if (!strcmp(command,"init")) {
     
     // check arguments
-    if(nrhs!=1+3)
+    if(nrhs!=1+3) {
       mexErrMsgTxt("3 parameters required (f,cu,cv).");
-    if(!mxIsDouble(prhs[1]) || mxGetM(prhs[1])*mxGetN(prhs[1])!=1)
+    }
+    if(!mxIsDouble(prhs[1]) || mxGetM(prhs[1])*mxGetN(prhs[1])!=1) {
       mexErrMsgTxt("Input f must be a double scalar.");
-    if(!mxIsDouble(prhs[2]) || mxGetM(prhs[2])*mxGetN(prhs[2])!=1)
+    }
+    if(!mxIsDouble(prhs[2]) || mxGetM(prhs[2])*mxGetN(prhs[2])!=1) {
       mexErrMsgTxt("Input cu must be a double scalar.");
-    if(!mxIsDouble(prhs[3]) || mxGetM(prhs[3])*mxGetN(prhs[3])!=1)
+    }
+    if(!mxIsDouble(prhs[3]) || mxGetM(prhs[3])*mxGetN(prhs[3])!=1) {
       mexErrMsgTxt("Input cv must be a double scalar.");
+    }
     
     double f    = *((double*)mxGetPr(prhs[1]));
     double cu   = *((double*)mxGetPr(prhs[2]));
@@ -62,24 +66,33 @@ void mexFunction (int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[]) {
   } else if (!strcmp(command,"update")) {
     
     // check arguments (for parameter description see reconstruction.h)
-    if(nrhs!=1+7)
+    if(nrhs!=1+7) {
       mexErrMsgTxt("7 inputs required (p_matched,i_matched,Tr,point_type,min_track_length,max_dist,min_angle).");
-    if(!mxIsDouble(prhs[1]) || mxGetM(prhs[1])!=4)
+    }
+    if(!mxIsDouble(prhs[1]) || mxGetM(prhs[1])!=4) {
       mexErrMsgTxt("Input p_matched must be a 4xN double matrix.");
-    if(!mxIsDouble(prhs[2]) || mxGetM(prhs[2])!=2)
+    }
+    if(!mxIsDouble(prhs[2]) || mxGetM(prhs[2])!=2) {
       mexErrMsgTxt("Input i_matched must be a 2xN double matrix.");
-    if(!mxIsDouble(prhs[3]) || mxGetM(prhs[3])!=4 || mxGetN(prhs[3])!=4)
+    }
+    if(!mxIsDouble(prhs[3]) || mxGetM(prhs[3])!=4 || mxGetN(prhs[3])!=4) {
       mexErrMsgTxt("Input Tr must be a 4x4 double matrix.");
-    if(!mxIsDouble(prhs[4]) || mxGetM(prhs[4])*mxGetN(prhs[4])!=1)
+    }
+    if(!mxIsDouble(prhs[4]) || mxGetM(prhs[4])*mxGetN(prhs[4])!=1) {
       mexErrMsgTxt("Input point_type must be a double scalar.");
-    if(!mxIsDouble(prhs[5]) || mxGetM(prhs[5])*mxGetN(prhs[5])!=1)
+    }
+    if(!mxIsDouble(prhs[5]) || mxGetM(prhs[5])*mxGetN(prhs[5])!=1) {
       mexErrMsgTxt("Input min_track_length must be a double scalar.");
-    if(!mxIsDouble(prhs[6]) || mxGetM(prhs[6])*mxGetN(prhs[6])!=1)
+    }
+    if(!mxIsDouble(prhs[6]) || mxGetM(prhs[6])*mxGetN(prhs[6])!=1) {
       mexErrMsgTxt("Input max_dist must be a double scalar.");
-    if(!mxIsDouble(prhs[7]) || mxGetM(prhs[7])*mxGetN(prhs[7])!=1)
+    }
+    if(!mxIsDouble(prhs[7]) || mxGetM(prhs[7])*mxGetN(prhs[7])!=1) {
       mexErrMsgTxt("Input min_angle must be a double scalar.");
-    if(nlhs!=0)
+    }
+    if(nlhs!=0) {
       mexErrMsgTxt("No outputs required.");
+    }
     
     // get pointers
     double* p_matched_data   =            (double*)mxGetPr(prhs[1]);
@@ -106,7 +119,7 @@ void mexFunction (int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[]) {
     }
     
     // create matrix
-    Matrix Tr(4,4,Tr_data);
+    Matrix Tr(4, 4, Tr_data);
     Tr = ~Tr;
     
     // update
@@ -116,12 +129,13 @@ void mexFunction (int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[]) {
   } else if (!strcmp(command,"getpoints")) {
     
     // check arguments
-    if(nlhs!=1)
+    if(nlhs!=1) {
       mexErrMsgTxt("1 output required (points).");
+    }
     
     // get inliers
     vector<Reconstruction::point3d> points = R->getPoints();
-    const int dims[] = {3,points.size()};
+    const size_t dims[] = {3,points.size()};
     plhs[0] = mxCreateNumericArray(2,dims,mxDOUBLE_CLASS,mxREAL);
 
     double *points_mex = (double*)mxGetPr(plhs[0]);
