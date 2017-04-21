@@ -29,7 +29,7 @@ using namespace std;
 
 static VisualOdometryStereo *viso;
 
-template<class T> T* transpose(T* I,const int32_t* dims) {
+template<class T> T* transpose(T* I, const size_t* dims) {
   T* I_ = (T*)malloc(dims[0]*dims[1]*sizeof(T));
   for (int32_t u=0; u<dims[1]; u++) {
     for (int32_t v=0; v<dims[0]; v++) {
@@ -50,12 +50,14 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   if (!strcmp(command,"init")) {
     
     // check arguments
-    if(nrhs!=1+1)
+    if(nrhs!=1+1) {
       mexErrMsgTxt("1 parameter required (configuration parameters).");
+    }
 
     // check if we have a parameter structure
-    if (!mxIsStruct(prhs[1]))
+    if (!mxIsStruct(prhs[1])) {
       mexErrMsgTxt("Input param must be a structure.");
+    }
     
     // parameters
     VisualOdometryStereo::parameters param;
@@ -98,30 +100,37 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   } else if (!strcmp(command,"process")) {
     
     // check for proper number of arguments
-    if (nrhs!=2+1 && nrhs!=3+1)
+    if (nrhs!=2+1 && nrhs!=3+1) {
       mexErrMsgTxt("2 or 3 inputs required: I1 (left image), I2 (right image), [replace].");
-    if (nlhs!=1) 
+    }
+    if (nlhs!=1) {
       mexErrMsgTxt("1 outputs required: Tr (transformation from previous to current frame.");  
+    }
 
     // check for proper argument types and sizes
-    if (!mxIsUint8(prhs[1]) || mxGetNumberOfDimensions(prhs[1])!=2)
+    if (!mxIsUint8(prhs[1]) || mxGetNumberOfDimensions(prhs[1])!=2) {
       mexErrMsgTxt("Input I1 (left image) must be a uint8 image.");
-    if (!mxIsUint8(prhs[2]) || mxGetNumberOfDimensions(prhs[2])!=2)
+    }
+    if (!mxIsUint8(prhs[2]) || mxGetNumberOfDimensions(prhs[2])!=2) {
       mexErrMsgTxt("Input I2 (right image) must be a uint8 image.");
-    if (mxGetM(prhs[1])!=mxGetM(prhs[2]) || mxGetN(prhs[1])!=mxGetN(prhs[2]))
+    }
+    if (mxGetM(prhs[1])!=mxGetM(prhs[2]) || mxGetN(prhs[1])!=mxGetN(prhs[2])) {
       mexErrMsgTxt("Input I1 and I2 must be images of the same size.");
-    if (nrhs==3+1 && !mxIsDouble(prhs[3]))
+    }
+    if (nrhs==3+1 && !mxIsDouble(prhs[3])) {
       mexErrMsgTxt("Input replace must be a double scalar (0/1).");
+    }
     
     // get image pointers
     uint8_t*       I1   = (uint8_t*)mxGetPr(prhs[1]);
     uint8_t*       I2   = (uint8_t*)mxGetPr(prhs[2]);
-    const int32_t *dims =   mxGetDimensions(prhs[1]);
+    const size_t *dims =   mxGetDimensions(prhs[1]);
     
     // set replacement variable
     bool replace = false;
-    if (nrhs==3+1)
+    if (nrhs == 3+1) {
       replace = (bool)(*((double*)mxGetPr(prhs[3])));
+    }
     
     // transpose images (align row-wise)
     uint8_t* I1_     = transpose<uint8_t>(I1,dims);
@@ -133,8 +142,8 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
     // return motion estimate (mapping from previous to current frame)
     Matrix Tr_delta = ~(viso->getMotion());
-    const int tr_dims[] = {4,4};
-    plhs[0] = mxCreateNumericArray(2,tr_dims,mxDOUBLE_CLASS,mxREAL);
+    const size_t tr_dims[] = {4,4};
+    plhs[0] = mxCreateNumericArray(2, tr_dims, mxDOUBLE_CLASS, mxREAL);
     Tr_delta.getData((double*)mxGetPr(plhs[0]));
     
     // release temporary memory
@@ -145,14 +154,17 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   } else if (!strcmp(command, "process_matched")) {
     
     // check for proper number of arguments
-    if (nrhs!=1+1)
+    if (nrhs!=1+1) {
       mexErrMsgTxt("1 inputs required: p_matched (NxM).");
-    if (nlhs!=1) 
+    }
+    if (nlhs!=1) {
       mexErrMsgTxt("1 outputs required: Tr (transformation from previous to current frame.");  
+    }
     
     // make sure the second input argument is type double
-    if( !mxIsDouble(prhs[1]) || mxIsComplex(prhs[1]))
+    if( !mxIsDouble(prhs[1]) || mxIsComplex(prhs[1])) {
         mexErrMsgTxt("Input matrix must be type double.");
+    }
     
     // get input
     double *matches_in = mxGetPr(prhs[1]);
@@ -173,36 +185,39 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
      
     // return motion estimate (mapping from previous to current frame)
     Matrix Tr_delta = ~(viso->getMotion());
-    const int tr_dims[] = {4,4};
-    plhs[0] = mxCreateNumericArray(2,tr_dims,mxDOUBLE_CLASS,mxREAL);
+    const size_t tr_dims[] = {4, 4};
+    plhs[0] = mxCreateNumericArray(2, tr_dims, mxDOUBLE_CLASS, mxREAL);
     Tr_delta.getData((double*)mxGetPr(plhs[0]));
     
   // query number of matches
   } else if (!strcmp(command,"num_matches")) {
     // check arguments
-    if (nrhs != 1+0)
+    if (nrhs != 1+0) {
       mexErrMsgTxt("No input required.");
+    }
     
-    const int dims[] = {1,1};
-    plhs[0] = mxCreateNumericArray(2,dims,mxDOUBLE_CLASS,mxREAL);
+    const size_t dims[] = {1,1};
+    plhs[0] = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
     *((double*)mxGetPr(plhs[0])) = (double)viso->getNumberOfMatches();
         
   // get matches
   } else if (!strcmp(command,"get_matches")) {
     
     // check arguments
-    if (nrhs != 1+0)
+    if (nrhs != 1+0) {
       mexErrMsgTxt("No input required.");
+    }
     
-    if (nlhs != 1)
+    if (nlhs != 1) {
       mexErrMsgTxt("One output required (p_matched).");
+    }
       
     // grab matches
     vector<Matcher::p_match> matches = viso->getMatches();
 
     // create output matrix with matches
-    const int32_t p_matched_dims[] = {8,matches.size()};
-    plhs[0] = mxCreateNumericArray(2,p_matched_dims,mxDOUBLE_CLASS,mxREAL);
+    const size_t p_matched_dims[] = {8, matches.size()};
+    plhs[0] = mxCreateNumericArray(2, p_matched_dims, mxDOUBLE_CLASS, mxREAL);
     double* p_matched_mex = (double*)mxGetPr(plhs[0]);
 
     // copy matches to mex array (convert indices: C++ => MATLAB)
@@ -221,41 +236,46 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   // query number of inliers
   } else if (!strcmp(command,"num_inliers")) {
     // check arguments
-    if (nrhs != 1+0)
+    if (nrhs != 1+0) {
       mexErrMsgTxt("No input required.");
+    }
     
-    const int dims[] = {1,1};
-    plhs[0] = mxCreateNumericArray(2,dims,mxDOUBLE_CLASS,mxREAL);
+    const size_t dims[] = {1, 1};
+    plhs[0] = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
     *((double*)mxGetPr(plhs[0])) = (double)viso->getNumberOfInliers();
     
   // query number of inliers
   } else if (!strcmp(command,"get_inliers")) {
     // check arguments
-    if (nrhs != 1+0)
+    if (nrhs != 1+0) {
       mexErrMsgTxt("No input required.");
+    }
     
     vector<int32_t> inliers = viso->getInlierIndices();
-    const int dims[] = {1,inliers.size()};
-    plhs[0] = mxCreateNumericArray(2,dims,mxDOUBLE_CLASS,mxREAL);
+    const size_t dims[] = {1, inliers.size()};
+    plhs[0] = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
     double* inliers_mex = (double*)mxGetPr(plhs[0]);
-    for (int32_t i=0; i<inliers.size(); i++)
+    for (int32_t i=0; i<inliers.size(); i++) {
       inliers_mex[i] = inliers[i]+1;
+    }
     
   // get matching indices
   } else if (!strcmp(command,"get_indices")) {
     
     // check arguments
-    if (nrhs!=1+0)
+    if (nrhs!=1+0) {
       mexErrMsgTxt("No input required.");
-    if (nlhs!=1)
+    }
+    if (nlhs!=1) {
       mexErrMsgTxt("One output required (i_matched).");
+    }
     
     // grab matches
     vector<Matcher::p_match> matches = viso->getMatches();
       
     // create output matrix with matches
-    const int32_t i_matched_dims[] = {4,matches.size()};
-    plhs[0] = mxCreateNumericArray(2,i_matched_dims,mxDOUBLE_CLASS,mxREAL);
+    const size_t i_matched_dims[] = {4, matches.size()};
+    plhs[0] = mxCreateNumericArray(2, i_matched_dims, mxDOUBLE_CLASS, mxREAL);
     double* i_matched_mex = (double*)mxGetPr(plhs[0]);
 
     // copy matches to mex array
