@@ -36,4 +36,4 @@ matcherMex('close');
 % show matching results
 disp(['Number of matched points: ' num2str(length(p_matched))]);
 disp('Plotting ...');
-plotMatch(I1c,p_matched,1);
+plotMatch(I1c, p_matched, 1);

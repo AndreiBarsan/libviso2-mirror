@@ -4,8 +4,9 @@ clear all; close all; dbstop error;
 
 % parameter settings (for an example, please download
 % sequence '2010_03_09_drive_0019' from www.cvlibs.net)
-img_dir     = '/home/geiger/5_Data/kitti/2011_stereo/2010_03_09_drive_0019';
+% img_dir     = '/home/geiger/5_Data/kitti/2011_stereo/2010_03_09_drive_0019';
 %img_dir     = 'C:\Users\geiger\Desktop\2010_03_09_drive_0019';
+img_dir = '/Users/andrei/datasets/karlsruhe/2010_03_09_drive_0019';
 param.f     = 645.2;
 param.cu    = 635.9;
 param.cv    = 194.1;
@@ -55,7 +56,8 @@ for frame=first_frame:last_frame
     plot([Tr_total{k-1}(1,4) Tr_total{k}(1,4)], ...
          [Tr_total{k-1}(3,4) Tr_total{k}(3,4)],'-xb','LineWidth',1);
   end
-  pause(0.05); refresh;
+  pause(0.01);
+  refresh;
 
   % output statistics
   num_matches = visualOdometryStereoMex('num_matches');

@@ -40,7 +40,7 @@ template<class T> T* transpose(T* I,const int32_t* dims) {
   return I_;
 }
 
-void mexFunction (int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[]) {
+void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
   // read command
   char command[128];
@@ -51,7 +51,7 @@ void mexFunction (int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[]) {
     
     // check arguments
     if(nrhs!=1+1)
-      mexErrMsgTxt("1 parameter required (param).");
+      mexErrMsgTxt("1 parameter required (configuration parameters).");
 
     // check if we have a parameter structure
     if (!mxIsStruct(prhs[1]))
@@ -142,7 +142,7 @@ void mexFunction (int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[]) {
     free(I2_);
     
   // process
-  } else if (!strcmp(command,"process_matched")) {
+  } else if (!strcmp(command, "process_matched")) {
     
     // check for proper number of arguments
     if (nrhs!=1+1)
@@ -179,6 +179,10 @@ void mexFunction (int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[]) {
     
   // query number of matches
   } else if (!strcmp(command,"num_matches")) {
+    // check arguments
+    if (nrhs != 1+0)
+      mexErrMsgTxt("No input required.");
+    
     const int dims[] = {1,1};
     plhs[0] = mxCreateNumericArray(2,dims,mxDOUBLE_CLASS,mxREAL);
     *((double*)mxGetPr(plhs[0])) = (double)viso->getNumberOfMatches();
@@ -187,9 +191,10 @@ void mexFunction (int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[]) {
   } else if (!strcmp(command,"get_matches")) {
     
     // check arguments
-    if (nrhs!=1+0)
+    if (nrhs != 1+0)
       mexErrMsgTxt("No input required.");
-    if (nlhs!=1)
+    
+    if (nlhs != 1)
       mexErrMsgTxt("One output required (p_matched).");
       
     // grab matches
@@ -215,12 +220,19 @@ void mexFunction (int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[]) {
     
   // query number of inliers
   } else if (!strcmp(command,"num_inliers")) {
+    // check arguments
+    if (nrhs != 1+0)
+      mexErrMsgTxt("No input required.");
+    
     const int dims[] = {1,1};
     plhs[0] = mxCreateNumericArray(2,dims,mxDOUBLE_CLASS,mxREAL);
     *((double*)mxGetPr(plhs[0])) = (double)viso->getNumberOfInliers();
     
   // query number of inliers
   } else if (!strcmp(command,"get_inliers")) {
+    // check arguments
+    if (nrhs != 1+0)
+      mexErrMsgTxt("No input required.");
     
     vector<int32_t> inliers = viso->getInlierIndices();
     const int dims[] = {1,inliers.size()};

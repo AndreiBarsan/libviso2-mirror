@@ -29,8 +29,8 @@ matcherMex('push',I1c,I2c);
 disp(['Feature detection: ' num2str(toc) ' seconds']);
 
 % match images
-tic; matcherMex('match',2);
-p_matched = matcherMex('get_matches',2);
+tic; matcherMex('match', 2);
+p_matched = matcherMex('get_matches', 2);
 disp(['Feature matching:  ' num2str(toc) ' seconds']);
 
 % close matcher

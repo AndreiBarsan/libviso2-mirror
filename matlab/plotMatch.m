@@ -8,9 +8,6 @@ if nargin<4
   inliers = 1:size(p_matched,2);
 end
 
-disp(['plotMatch: p_matched']);
-size(p_matched)
-
 p_matched = p_matched';
 
 % show image
