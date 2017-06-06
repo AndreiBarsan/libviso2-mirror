@@ -66,8 +66,11 @@ vector<double> VisualOdometryStereo::estimateMotion (vector<Matcher::p_match> p_
   
   // get number of matches
   int32_t N  = p_matched.size();
-  if (N<6)
+  if (N < 6) {
+//    cerr << "Insufficient matches between images: " << N << " instead of 6, the minimum required."
+//         << endl;
     return vector<double>();
+  }
 
   // allocate dynamic memory
   X          = new double[N];
