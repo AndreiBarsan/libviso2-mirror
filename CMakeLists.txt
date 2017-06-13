@@ -8,8 +8,9 @@ set (Viso2_INCLUDE_DIRS src)
 # include directory
 include_directories("${Viso2_INCLUDE_DIRS}")
 
-# use sse3 instruction set
-set(CMAKE_CXX_FLAGS "-msse3")
+# use sse3 instruction set and an optimized build; note that at least on modern versions of GCC
+# (5.4+) the -O3 flag is actually very important and can lead to 3-4x slowdown if not set!
+set(CMAKE_CXX_FLAGS "-march=native -fPIC -O3 -std=c++11")
 
 # sources
 set(LIBVISO2_SRC_FILES
@@ -27,7 +28,6 @@ set(LIBVISO2_SRC_FILES
 add_library(viso2 ${LIBVISO2_SRC_FILES})
 set(Viso2_LIBS viso2)
 
-# demo program (unused; requires png++)
-#add_executable(viso2 ${LIBVISO2_SRC_FILES})
-#target_link_libraries (viso2 png)
-
+# demo program (unused; requires png++: sudo apt install libpng++-dev)
+add_executable(viso2-demo src/demo.cpp)
+target_link_libraries(viso2-demo viso2 png)
