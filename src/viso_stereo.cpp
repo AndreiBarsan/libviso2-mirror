@@ -38,7 +38,7 @@ bool VisualOdometryStereo::process (uint8_t *I1,uint8_t *I2,int32_t* dims,bool r
 //  dynslam::utils::Tic("VOS::process");
 
   // bootstrap motion estimate if invalid
-  if (~Tr_valid) {
+  if (!Tr_valid) {
     printf("viso2 (%s): Tr was not valid; doing full feature match\n", __FILE__);
     matcher->matchFeatures(2);
     matcher->bucketFeatures(param.bucket.max_features,param.bucket.bucket_width,param.bucket.bucket_height);                          
