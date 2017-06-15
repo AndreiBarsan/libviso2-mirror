@@ -108,7 +108,7 @@ public:
   //                         the input images, otherwise the current image is first copied
   //                         to the previous image (ring buffer functionality, descriptors need
   //                         to be computed only once)    
-  void pushBack (uint8_t *I1,uint8_t* I2,int32_t* dims,const bool replace);
+  void pushBack(uint8_t *I1,uint8_t* I2,int32_t* dims,const bool replace);
   
   // computes features from a single image and pushes it back to a ringbuffer,
   // which interally stores the features of the current and previous image pair
@@ -128,6 +128,11 @@ public:
 
   // return vector with matched feature points and indices
   std::vector<Matcher::p_match> getMatches() { return p_matched_2; }
+
+  // return a vector with the latest matched feature points and indices, before the removal of
+  // outliers
+  std::vector<Matcher::p_match> getRawMatches() { return raw_matches; }
+  const std::vector<Matcher::p_match> getRawMatches() const { return raw_matches; }
 
   // given a vector of inliers computes gain factor between the current and
   // the previous frame. this function is useful if you want to reconstruct 3d
@@ -173,7 +178,12 @@ private:
   void nonMaximumSuppression (int16_t* I_f1,int16_t* I_f2,const int32_t* dims,std::vector<Matcher::maximum> &maxima,int32_t nms_n);
 
   // descriptor functions
-  inline uint8_t saturate(int16_t in);
+  inline uint8_t saturate(int16_t in) {
+    if (in<0)   return 0;
+    if (in>255) return 255;
+    return static_cast<uint8_t>(in);
+  }
+
   void filterImageAll (uint8_t* I,uint8_t* I_du,uint8_t* I_dv,int16_t* I_f1,int16_t* I_f2,const int* dims);
   void filterImageSobel (uint8_t* I,uint8_t* I_du,uint8_t* I_dv,const int* dims);
   inline void computeDescriptor (const uint8_t* I_du,const uint8_t* I_dv,const int32_t &bpl,const int32_t &u,const int32_t &v,uint8_t *desc_addr);
@@ -241,6 +251,7 @@ private:
 
   std::vector<Matcher::p_match> p_matched_1;
   std::vector<Matcher::p_match> p_matched_2;
+  std::vector<Matcher::p_match> raw_matches;
   std::vector<Matcher::range>   ranges;
 };
 

@@ -220,8 +220,13 @@ void Matcher::matchFeatures(int32_t method, Matrix *Tr_delta) {
 
     // 1st pass (sparse matches)
     matching(m1p1,m2p1,m1c1,m2c1,n1p1,n2p1,n1c1,n2c1,p_matched_1,method,false,Tr_delta);
+
+    // Saves the set of matches without any outliers removed: useful for DynSLAM where we care about
+    // all SF points.
+    raw_matches = p_matched_1;
+
     removeOutliers(p_matched_1,method);
-    
+
     // compute search range prior statistics (used for speeding up 2nd pass)
     computePriorStatistics(p_matched_1,method);      
 
@@ -520,12 +525,6 @@ void Matcher::computeDescriptors (uint8_t* I_du,uint8_t* I_dv,const int32_t bpl,
   }
 }
 
-inline uint8_t Matcher::saturate (int16_t in) {
-  if (in<0)   return 0;
-  if (in>255) return 255;
-  return in;
-}
-
 void Matcher::filterImageAll (uint8_t* I,uint8_t* I_du,uint8_t* I_dv,int16_t* I_f1,int16_t* I_f2,const int* dims) {
   
   // get bpl and height  
@@ -653,7 +652,10 @@ void Matcher::computeFeatures (uint8_t *I,const int32_t* dims,int32_t* &max1,int
   
   int32_t dims_matching[3];
   memcpy(dims_matching,dims,3*sizeof(int32_t));
-  
+
+  // TODO-PERF(andrei): Keep half-res and filter images allocated throughout the lifetime of viso.
+  // TODO-PERF(andrei): Consider doing the filtering on the GPU.
+
   // allocate memory for sobel images and filter images
   if (!param.half_resolution) {
     I_du = (uint8_t*)_mm_malloc(dims[2]*dims[1]*sizeof(uint8_t*),16);
@@ -678,6 +680,8 @@ void Matcher::computeFeatures (uint8_t *I,const int32_t* dims,int32_t* &max1,int
     filter::checkerboard5x5(I_matching,I_f2,dims_matching[2],dims_matching[1]);
     _mm_free(I_matching);
   }
+
+  // TODO-PERF(andrei): NMS is also easy to parallelize on the GPU.
   
   // extract sparse maxima (1st pass) via non-maximum suppression
   vector<Matcher::maximum> maxima1;
@@ -1584,6 +1588,7 @@ void Matcher::refinement (vector<Matcher::p_match> &p_matched,int32_t method) {
 }
 
 float Matcher::mean(const uint8_t* I,const int32_t &bpl,const int32_t &u_min,const int32_t &u_max,const int32_t &v_min,const int32_t &v_max) {
+
   float mean = 0;
   for (int32_t v=v_min; v<=v_max; v++)
     for (int32_t u=u_min; u<=u_max; u++)

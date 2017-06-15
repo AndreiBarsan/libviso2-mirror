@@ -110,21 +110,21 @@ public:
     os << p.val[2][0] << " " << p.val[2][1] << " "  << p.val[2][2]  << " "  << p.val[2][3];
     return os;
   }
-  
+
+  // compute transformation matrix from transformation vector
+  static Matrix transformationVectorToMatrix (std::vector<double> tr);
+
 protected:
 
   // calls bucketing and motion estimation
   bool updateMotion ();
-
-  // compute transformation matrix from transformation vector  
-  Matrix transformationVectorToMatrix (std::vector<double> tr);
 
   // compute motion from previous to current coordinate system
   // if motion could not be computed, resulting vector will be of size 0
   virtual std::vector<double> estimateMotion (std::vector<Matcher::p_match> p_matched) = 0;
   
   // get random and unique sample of num numbers from 1:N
-  std::vector<int32_t> getRandomSample (int32_t N,int32_t num);
+  static std::vector<int32_t> getRandomSample (int32_t N,int32_t num);
 
   Matrix                         Tr_delta;   // transformation (previous -> current frame)  
   bool                           Tr_valid;   // motion estimate exists?

@@ -20,6 +20,7 @@ Street, Fifth Floor, Boston, MA 02110-1301, USA
 */
 
 #include "viso_stereo.h"
+#include "../../DynSLAM/Utils.h"
 
 using namespace std;
 
@@ -38,6 +39,7 @@ bool VisualOdometryStereo::process (uint8_t *I1,uint8_t *I2,int32_t* dims,bool r
 //  dynslam::utils::Tic("VOS::process");
 
   // bootstrap motion estimate if invalid
+  Tr_valid = true;
   if (!Tr_valid) {
     printf("viso2 (%s): Tr was not valid; doing full feature match\n", __FILE__);
     matcher->matchFeatures(2);
@@ -79,6 +81,8 @@ vector<double> VisualOdometryStereo::estimateMotion (vector<Matcher::p_match> p_
     return vector<double>();
   }
 
+  // TODO-PERF(andrei): We can just pre-allocate these on init for some large enough N. If full-size
+  // matching is used, N can easily be ~350 => ~120kb. Ok, not too much.
   // allocate dynamic memory
   X          = new double[N];
   Y          = new double[N];
@@ -114,7 +118,7 @@ vector<double> VisualOdometryStereo::estimateMotion (vector<Matcher::p_match> p_
     for (int32_t i=0; i<6; i++)
       tr_delta_curr[i] = 0;
 
-    // minimize reprojection errors
+    // minimize reprojection errors of the previous frame's keypoints onto the current frame
     VisualOdometryStereo::result result = UPDATED;
     int32_t iter=0;
     while (result==UPDATED) {
@@ -297,6 +301,8 @@ void VisualOdometryStereo::computeResidualsAndJacobian(vector<double> &tr,vector
     for (int32_t j=0; j<6; j++) {
 
       // derivatives of 3d pt. in curr. left coordinates wrt. param j
+      // We're optimizing the pose (6 elements: 3 rot, 3 trans), so we want the derivative of the
+      // 3D point wrt each of these 6 parameters.
       switch (j) {
         case 0: X1cd = 0;
                 Y1cd = rdrx10*X1p+rdrx11*Y1p+rdrx12*Z1p;

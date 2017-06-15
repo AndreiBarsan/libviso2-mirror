@@ -15,7 +15,6 @@ set(CMAKE_CXX_FLAGS "-march=native -fPIC -O3 -std=c++11")
 # sources
 set(LIBVISO2_SRC_FILES
     src/filter.cpp
-    src/filter.cpp
     src/matcher.cpp
     src/matrix.cpp
     src/reconstruction.cpp

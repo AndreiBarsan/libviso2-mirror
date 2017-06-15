@@ -62,12 +62,17 @@ public:
   // output: returns false if an error occured
   bool process (uint8_t *I1,uint8_t *I2,int32_t* dims,bool replace=false);
 
+  const std::vector<Matcher::p_match> getRawMatches() const {
+    return matcher->getRawMatches();
+  }
+
   using VisualOdometry::process;
 
-private:
-
+  // Note: made public for experimental DynSLAM purposes.
   std::vector<double>  estimateMotion (std::vector<Matcher::p_match> p_matched);
-  enum                 result { UPDATED, FAILED, CONVERGED };  
+
+private:
+  enum                 result { UPDATED, FAILED, CONVERGED };
   result               updateParameters(std::vector<Matcher::p_match> &p_matched,std::vector<int32_t> &active,std::vector<double> &tr,double step_size,double eps);
   void                 computeObservations(std::vector<Matcher::p_match> &p_matched,std::vector<int32_t> &active);
   void                 computeResidualsAndJacobian(std::vector<double> &tr,std::vector<int32_t> &active);
