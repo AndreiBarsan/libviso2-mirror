@@ -69,7 +69,11 @@ public:
   using VisualOdometry::process;
 
   // Note: made public for experimental DynSLAM purposes.
-  std::vector<double>  estimateMotion (std::vector<Matcher::p_match> p_matched);
+  // The method uses RANSAC to robustly fit a 6-DoF transform over 3 4-way matches. At every RANSAC
+  // iteration, 3 (curr-left, curr-right, prev-left, prev-right) tuples are sampled and the 6-DoF
+  // transform is fit using Gauss-Newton, minimising the sum of squared reprojection errors in the
+  // left and right current frames, of the 3D points triangulated from the previous frame.
+  std::vector<double>  estimateMotion(std::vector<Matcher::p_match> p_matched);
 
 private:
   enum                 result { UPDATED, FAILED, CONVERGED };

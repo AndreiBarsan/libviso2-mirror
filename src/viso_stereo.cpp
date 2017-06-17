@@ -20,7 +20,6 @@ Street, Fifth Floor, Boston, MA 02110-1301, USA
 */
 
 #include "viso_stereo.h"
-#include "../../DynSLAM/Utils.h"
 
 using namespace std;
 
@@ -122,9 +121,13 @@ vector<double> VisualOdometryStereo::estimateMotion (vector<Matcher::p_match> p_
     VisualOdometryStereo::result result = UPDATED;
     int32_t iter=0;
     while (result==UPDATED) {
-      result = updateParameters(p_matched,active,tr_delta_curr,1,1e-6);
-      if (iter++ > 20 || result==CONVERGED)
+//      result = updateParameters(p_matched,active,tr_delta_curr,1,1e-6);
+      result = updateParameters(p_matched,active,tr_delta_curr, 0.5, 1e-6);
+
+      if (iter++ > 20 || result==CONVERGED) {
+//        cout << "Break @ " << iter << " iterations in libviso motion estimation UPDATE." << endl;
         break;
+      }
     }
 
     // overwrite best parameters if we have more inliers
@@ -142,9 +145,12 @@ vector<double> VisualOdometryStereo::estimateMotion (vector<Matcher::p_match> p_
     int32_t iter=0;
     VisualOdometryStereo::result result = UPDATED;
     while (result==UPDATED) {     
-      result = updateParameters(p_matched,inliers,tr_delta,1,1e-8);
-      if (iter++ > 100 || result==CONVERGED)
+//      result = updateParameters(p_matched,inliers,tr_delta, 1, 1e-8);
+      result = updateParameters(p_matched,inliers,tr_delta, 0.25, 1e-8);
+      if (iter++ > 250 || result==CONVERGED) {
+//        cout << "Break @ " << iter << " iterations in libviso motion estimation REFINEMENT." << endl;
         break;
+      }
     }
 
     // not converged
@@ -153,6 +159,7 @@ vector<double> VisualOdometryStereo::estimateMotion (vector<Matcher::p_match> p_
 
   // not enough inliers
   } else {
+    cerr << "Insufficient final inliers in viso!" << endl;
     success = false;
   }
 
@@ -224,9 +231,12 @@ VisualOdometryStereo::result VisualOdometryStereo::updateParameters(vector<Match
   if (B.solve(A)) {
     bool converged = true;
     for (int32_t m=0; m<6; m++) {
+      // Update each parameter of the transform
       tr[m] += step_size*B.val[m][0];
-      if (fabs(B.val[m][0])>eps)
+
+      if (fabs(B.val[m][0])>eps) {
         converged = false;
+      }
     }
     if (converged)
       return CONVERGED;
