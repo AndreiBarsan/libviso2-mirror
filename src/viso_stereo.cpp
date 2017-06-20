@@ -319,7 +319,7 @@ void VisualOdometryStereo::computeResidualsAndJacobian(vector<double> &tr,vector
     // compute 3d point in current right coordinate system
     X2c = X1c-param.base;
 
-    // for all paramters do
+    // for all parameters do
     for (int32_t j = 0; j < 6; j++) {
       // derivatives of 3d pt. in curr. left coordinates wrt. param j
       // We're optimizing the pose (6 elements: 3 rot, 3 trans), so we want the derivative of the
@@ -369,7 +369,7 @@ void VisualOdometryStereo::computeResidualsAndJacobian(vector<double> &tr,vector
     }
 
     // set prediction (project via K)
-    // No derivatives involved here: this is just the standard u = K
+    // No derivatives involved here: this is just the standard K * dehomog(X)
     p_predict[4 * i + 0] = param.calib.f * X1c / Z1c + param.calib.cu; // left u
     p_predict[4 * i + 1] = param.calib.f * Y1c / Z1c + param.calib.cv; // left v
     p_predict[4 * i + 2] = param.calib.f * X2c / Z1c + param.calib.cu; // right u

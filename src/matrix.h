@@ -46,6 +46,7 @@ Street, Fifth Floor, Boston, MA 02110-1301, USA
 typedef double FLOAT;      // double precision
 //typedef float  FLOAT;    // single precision
 
+// Note: many of the algorithms for, e.g., SVD, are from the book "Numerical Recipes in C" by Press et al.
 class Matrix {
 
 public:
