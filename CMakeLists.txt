@@ -25,7 +25,7 @@ set(LIBVISO2_SRC_FILES
 )
 
 add_library(viso2 ${LIBVISO2_SRC_FILES})
-set(Viso2_LIBS viso2)
+set(Viso2_LIBS viso2 CACHE INTERNAL "")
 
 # demo program (unused; requires png++: sudo apt install libpng++-dev)
 add_executable(viso2-demo src/demo.cpp)
