@@ -60,7 +60,7 @@ bool VisualOdometryStereo::process (uint8_t *I1,uint8_t *I2,int32_t* dims,bool r
   return updateOk;
 }
 
-vector<double> VisualOdometryStereo::estimateMotion (vector<Matcher::p_match> p_matched) {
+vector<double> VisualOdometryStereo::estimateMotion(vector<Matcher::p_match> p_matched) {
   
   // return value
   bool success = true;
@@ -115,15 +115,17 @@ vector<double> VisualOdometryStereo::estimateMotion (vector<Matcher::p_match> p_
     vector<int32_t> active = getRandomSample(N,3);
 
     // clear parameter vector
-    for (int32_t i=0; i<6; i++)
+    for (int32_t i=0; i<6; i++) {
+      // TODO(andrei): warm start here
       tr_delta_curr[i] = 0;
+    }
 
     // minimize reprojection errors of the previous frame's keypoints onto the current frame
     VisualOdometryStereo::result result = UPDATED;
     int32_t iter=0;
     while (result==UPDATED) {
 //      result = updateParameters(p_matched,active,tr_delta_curr,1,1e-6);
-      result = updateParameters(p_matched,active,tr_delta_curr, 0.5, 1e-6);
+      result = updateParameters(p_matched, active, tr_delta_curr, 0.5, 1e-6);
 
       if (iter++ > 20 || result==CONVERGED) {
 //        cout << "Break @ " << iter << " iterations in libviso motion estimation UPDATE." << endl;
