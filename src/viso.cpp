@@ -42,7 +42,8 @@ VisualOdometry::~VisualOdometry () {
 bool VisualOdometry::updateMotion () {
   
   // estimate motion
-  vector<double> tr_delta = estimateMotion(p_matched);
+  static const vector<double> initial_estimate = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+  vector<double> tr_delta = estimateMotion(p_matched, initial_estimate);
   
   // on failure
   if (tr_delta.size()!=6)

@@ -121,7 +121,8 @@ protected:
 
   // compute motion from previous to current coordinate system
   // if motion could not be computed, resulting vector will be of size 0
-  virtual std::vector<double> estimateMotion (std::vector<Matcher::p_match> p_matched) = 0;
+  virtual std::vector<double> estimateMotion(std::vector<Matcher::p_match> p_matched,
+                                             const std::vector<double> &initial_guess) = 0;
   
   // get random and unique sample of num numbers from 1:N
   static std::vector<int32_t> getRandomSample (int32_t N,int32_t num);

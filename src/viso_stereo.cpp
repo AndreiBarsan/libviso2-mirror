@@ -20,6 +20,7 @@ Street, Fifth Floor, Boston, MA 02110-1301, USA
 */
 
 #include <cassert>
+#include <iomanip>
 #include "viso_stereo.h"
 
 using namespace std;
@@ -60,7 +61,10 @@ bool VisualOdometryStereo::process (uint8_t *I1,uint8_t *I2,int32_t* dims,bool r
   return updateOk;
 }
 
-vector<double> VisualOdometryStereo::estimateMotion(vector<Matcher::p_match> p_matched) {
+vector<double> VisualOdometryStereo::estimateMotion(
+    vector<Matcher::p_match> p_matched,
+    const vector<double> &initial_estimate
+) {
   
   // return value
   bool success = true;
@@ -116,19 +120,19 @@ vector<double> VisualOdometryStereo::estimateMotion(vector<Matcher::p_match> p_m
 
     // clear parameter vector
     for (int32_t i=0; i<6; i++) {
-      // TODO(andrei): warm start here
-      tr_delta_curr[i] = 0;
+      tr_delta_curr[i] = initial_estimate[i];
     }
 
     // minimize reprojection errors of the previous frame's keypoints onto the current frame
     VisualOdometryStereo::result result = UPDATED;
     int32_t iter=0;
+//    int MAX_ITERS = 20;   // original was 20, and usually took all 20 to converge with 0-init.
+    int MAX_ITERS = 5;
     while (result==UPDATED) {
-//      result = updateParameters(p_matched,active,tr_delta_curr,1,1e-6);
-      result = updateParameters(p_matched, active, tr_delta_curr, 0.5, 1e-6);
+      result = updateParameters(p_matched, active, tr_delta_curr, 1.0, 1e-6);
 
-      if (iter++ > 20 || result==CONVERGED) {
-//        cout << "Break @ " << iter << " iterations in libviso motion estimation UPDATE." << endl;
+      if (iter++ > MAX_ITERS || result==CONVERGED) {
+        cout << "Break @ " << iter << " iterations in libviso motion estimation UPDATE." << endl;
         break;
       }
     }
@@ -148,17 +152,26 @@ vector<double> VisualOdometryStereo::estimateMotion(vector<Matcher::p_match> p_m
     int32_t iter=0;
     VisualOdometryStereo::result result = UPDATED;
     while (result==UPDATED) {     
-//      result = updateParameters(p_matched,inliers,tr_delta, 1, 1e-8);
-      result = updateParameters(p_matched,inliers,tr_delta, 0.25, 1e-8);
-      if (iter++ > 250 || result==CONVERGED) {
+      result = updateParameters(p_matched,inliers,tr_delta, 1, 1e-8);
+//      result = updateParameters(p_matched,inliers,tr_delta, 0.25, 1e-8);
+      if (iter++ > 250 || result == CONVERGED) {
 //        cout << "Break @ " << iter << " iterations in libviso motion estimation REFINEMENT." << endl;
         break;
       }
     }
 
     // not converged
-    if (result!=CONVERGED)
+    if (result!=CONVERGED) {
       success = false;
+    }
+    else {
+      double res_sum = 0.0;
+      for(int i = 0; i < 4 * N; ++i) {
+        res_sum += p_residual[i] * p_residual[i];
+      }
+      double residual_frobenius = sqrt(res_sum / N / 4);
+      cout << "Final residual RMSE: " << setprecision(6) << residual_frobenius << endl;
+    }
 
   // not enough inliers
   } else {

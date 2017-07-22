@@ -73,7 +73,8 @@ public:
   // iteration, 3 (curr-left, curr-right, prev-left, prev-right) tuples are sampled and the 6-DoF
   // transform is fit using Gauss-Newton, minimising the sum of squared reprojection errors in the
   // left and right current frames, of the 3D points triangulated from the previous frame.
-  std::vector<double>  estimateMotion(std::vector<Matcher::p_match> p_matched);
+  std::vector<double>  estimateMotion(std::vector<Matcher::p_match> p_matched,
+                                      const std::vector<double> &initial_guess);
 
 private:
   enum                 result { UPDATED, FAILED, CONVERGED };
