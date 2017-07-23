@@ -126,13 +126,13 @@ vector<double> VisualOdometryStereo::estimateMotion(
     // minimize reprojection errors of the previous frame's keypoints onto the current frame
     VisualOdometryStereo::result result = UPDATED;
     int32_t iter=0;
-//    int MAX_ITERS = 20;   // original was 20, and usually took all 20 to converge with 0-init.
-    int MAX_ITERS = 5;
+//    int MAX_ITERS = 50;   // original was 20, and usually took all 20 to converge with 0-init.
+    int MAX_ITERS = 10;     // seems to work quite well with warm starts
     while (result==UPDATED) {
       result = updateParameters(p_matched, active, tr_delta_curr, 1.0, 1e-6);
 
-      if (iter++ > MAX_ITERS || result==CONVERGED) {
-        cout << "Break @ " << iter << " iterations in libviso motion estimation UPDATE." << endl;
+      if (iter++ > MAX_ITERS || result == CONVERGED) {
+//        cout << "Break @ " << iter << " iterations in libviso motion estimation UPDATE." << endl;
         break;
       }
     }
